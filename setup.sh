@@ -20,6 +20,7 @@ apt-get install -y --no-install-recommends \
 	python3 \
 	python3-pip \
 	python3-venv \
+	ffmpeg \
 	python-is-python3 \
 	pciutils \
 	build-essential \
