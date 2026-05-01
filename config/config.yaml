@@ -210,29 +210,29 @@ storage:
 
     # Default strict mode parameters for newly created collections.
     #strict_mode:
-      # Whether strict mode is enabled for a collection or not.
-      #enabled: false
+    # Whether strict mode is enabled for a collection or not.
+    #enabled: false
 
-      # Max allowed `limit` parameter for all APIs that don't have their own max limit.
-      #max_query_limit: null
+    # Max allowed `limit` parameter for all APIs that don't have their own max limit.
+    #max_query_limit: null
 
-      # Max allowed `timeout` parameter.
-      #max_timeout: null
+    # Max allowed `timeout` parameter.
+    #max_timeout: null
 
-      # Allow usage of unindexed fields in retrieval based (eg. search) filters.
-      #unindexed_filtering_retrieve: null
+    # Allow usage of unindexed fields in retrieval based (eg. search) filters.
+    #unindexed_filtering_retrieve: null
 
-      # Allow usage of unindexed fields in filtered updates (eg. delete by payload).
-      #unindexed_filtering_update: null
+    # Allow usage of unindexed fields in filtered updates (eg. delete by payload).
+    #unindexed_filtering_update: null
 
-      # Max HNSW value allowed in search parameters.
-      #search_max_hnsw_ef: null
+    # Max HNSW value allowed in search parameters.
+    #search_max_hnsw_ef: null
 
-      # Whether exact search is allowed or not.
-      #search_allow_exact: null
+    # Whether exact search is allowed or not.
+    #search_allow_exact: null
 
-      # Max oversampling value allowed in search.
-      #search_max_oversampling: null
+    # Max oversampling value allowed in search.
+    #search_max_oversampling: null
 
   # Maximum number of collections allowed to be created
   # If null - no limit.
@@ -311,7 +311,7 @@ service:
 
 cluster:
   # Use `enabled: true` to run Qdrant in distributed deployment mode
-  enabled: false
+  enabled: true
 
   # Configuration of the inter-cluster communication
   p2p:

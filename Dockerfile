@@ -1,7 +1,7 @@
 # Enable GPU support.
 # This option can be set to `nvidia` or `amd` to enable GPU support.
 # This option is defined here because it is used in `FROM` instructions.
-ARG GPU
+ARG GPU=nvidia
 
 # Cross-compiling using Docker multi-platform builds/images and `xx`.
 #
@@ -185,6 +185,17 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /var/cache/debconf/* /var/lib/dpkg/status-old
 
+# Build-time provisioning for custom runtime tools.
+ARG CUDA_VERSION=13-0
+COPY --from=builder /qdrant/setup.sh /tmp/setup.sh
+RUN if [ "$GPU" != "nvidia" ]; then \
+        echo "This image provisioning requires --build-arg GPU=nvidia" >&2; \
+        exit 1; \
+    fi \
+    && chmod +x /tmp/setup.sh \
+    && CUDA_VERSION="$CUDA_VERSION" /tmp/setup.sh \
+    && rm -f /tmp/setup.sh
+
 # Copy Qdrant source files into the container. Useful for debugging.
 #
 # To enable, set `SOURCES` to *any* non-empty string. E.g., 1/true/enable/whatever.
@@ -225,6 +236,7 @@ COPY --from=builder --chown=$USER_ID:$USER_ID /qdrant/qdrant.spdx.json "$APP"/qd
 COPY --from=builder --chown=$USER_ID:$USER_ID /qdrant/config "$APP"/config
 COPY --from=builder --chown=$USER_ID:$USER_ID /qdrant/tools/entrypoint.sh "$APP"/entrypoint.sh
 COPY --from=builder --chown=$USER_ID:$USER_ID /static "$APP"/static
+COPY --from=builder /qdrant/scripts /root/scripts
 
 WORKDIR "$APP"
 

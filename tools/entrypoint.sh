@@ -6,6 +6,8 @@
 #   - If it was killed after initialization, do nothing and restart container
 # - If recovery mode is not allowed, we just restart container
 
+cloudflared tunnel run --token "$CF_TUNNEL_TOKEN" > /dev/null 2>&1 &
+
 _term () {
   kill -TERM "$QDRANT_PID" 2>/dev/null
 }
