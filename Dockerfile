@@ -77,6 +77,13 @@ RUN xx-apt-get install -y pkg-config gcc g++ libc6-dev libunwind-dev
 # Select Cargo profile (e.g., `release`, `dev` or `ci`)
 ARG PROFILE=release
 
+# Optional overrides for release profile when building in memory-constrained CI.
+# Examples:
+#   --build-arg CARGO_PROFILE_RELEASE_LTO=thin
+#   --build-arg CARGO_PROFILE_RELEASE_CODEGEN_UNITS=4
+ARG CARGO_PROFILE_RELEASE_LTO
+ARG CARGO_PROFILE_RELEASE_CODEGEN_UNITS
+
 # Enable crate features
 ARG FEATURES
 
@@ -111,7 +118,9 @@ COPY --from=planner /qdrant/recipe.json recipe.json
 RUN PKG_CONFIG="/usr/bin/$(xx-info)-pkg-config" \
     PATH="$PATH:/opt/mold/bin" \
     RUSTFLAGS="${LINKER:+-C link-arg=-fuse-ld=}$LINKER ${TARGET_CPU:+-C target-cpu=}$TARGET_CPU $RUSTFLAGS" \
-    ${JEMALLOC_SYS_WITH_LG_PAGE:+env JEMALLOC_SYS_WITH_LG_PAGE="${JEMALLOC_SYS_WITH_LG_PAGE}"} \
+    ${JEMALLOC_SYS_WITH_LG_PAGE:+JEMALLOC_SYS_WITH_LG_PAGE="${JEMALLOC_SYS_WITH_LG_PAGE}"} \
+    ${CARGO_PROFILE_RELEASE_LTO:+CARGO_PROFILE_RELEASE_LTO="${CARGO_PROFILE_RELEASE_LTO}"} \
+    ${CARGO_PROFILE_RELEASE_CODEGEN_UNITS:+CARGO_PROFILE_RELEASE_CODEGEN_UNITS="${CARGO_PROFILE_RELEASE_CODEGEN_UNITS}"} \
     xx-cargo chef cook --profile $PROFILE ${FEATURES:+--features} $FEATURES --features=stacktrace ${GPU:+--features=gpu} --recipe-path recipe.json
 
 COPY . .
@@ -124,7 +133,9 @@ ARG GIT_COMMIT_ID
 RUN PKG_CONFIG="/usr/bin/$(xx-info)-pkg-config" \
     PATH="$PATH:/opt/mold/bin" \
     RUSTFLAGS="${LINKER:+-C link-arg=-fuse-ld=}$LINKER ${TARGET_CPU:+-C target-cpu=}$TARGET_CPU $RUSTFLAGS" \
-    ${JEMALLOC_SYS_WITH_LG_PAGE:+env JEMALLOC_SYS_WITH_LG_PAGE="${JEMALLOC_SYS_WITH_LG_PAGE}"} \
+    ${JEMALLOC_SYS_WITH_LG_PAGE:+JEMALLOC_SYS_WITH_LG_PAGE="${JEMALLOC_SYS_WITH_LG_PAGE}"} \
+    ${CARGO_PROFILE_RELEASE_LTO:+CARGO_PROFILE_RELEASE_LTO="${CARGO_PROFILE_RELEASE_LTO}"} \
+    ${CARGO_PROFILE_RELEASE_CODEGEN_UNITS:+CARGO_PROFILE_RELEASE_CODEGEN_UNITS="${CARGO_PROFILE_RELEASE_CODEGEN_UNITS}"} \
     xx-cargo build --profile $PROFILE ${FEATURES:+--features} $FEATURES --features=stacktrace ${GPU:+--features=gpu} --bin qdrant \
     && PROFILE_DIR=$(if [ "$PROFILE" = dev ]; then echo debug; else echo $PROFILE; fi) \
     && mv target/$(xx-cargo --print-target-triple)/$PROFILE_DIR/qdrant /qdrant/qdrant
