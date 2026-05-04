@@ -17,6 +17,22 @@ dpkg -i "$tmp_dir/cuda-keyring.deb"
 apt-get update
 apt-get install -y --no-install-recommends "cuda-toolkit-${CUDA_VERSION_APT}"
 
+# Ensure nvcc is discoverable for non-login build shells.
+if ! command -v nvcc >/dev/null 2>&1; then
+	nvcc_path="$(find /usr/local -type f -path '*/bin/nvcc' 2>/dev/null | head -n1 || true)"
+	if [ -n "$nvcc_path" ]; then
+		export PATH="$(dirname "$nvcc_path"):$PATH"
+	fi
+fi
+
+# Create /usr/local/cuda symlink when only versioned install dir exists.
+if [ ! -e /usr/local/cuda ]; then
+	versioned_cuda_dir="$(find /usr/local -maxdepth 1 -type d -name 'cuda-*' | sort -V | tail -n1 || true)"
+	if [ -n "$versioned_cuda_dir" ]; then
+		ln -s "$versioned_cuda_dir" /usr/local/cuda
+	fi
+fi
+
 # Persist CUDA environment variables for shell sessions.
 cat >/etc/profile.d/cuda.sh <<'EOF'
 export PATH=/usr/local/cuda/bin:$PATH
