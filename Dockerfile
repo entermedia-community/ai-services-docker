@@ -42,17 +42,13 @@ RUN set -eux; \
 
 COPY nvidia.sh /tmp/nvidia.sh
 COPY cf.sh /tmp/cf.sh
-COPY repo.sh /tmp/repo.sh
 
 RUN chmod +x /tmp/nvidia.sh
 RUN chmod +x /tmp/cf.sh
-RUN chmod +x /tmp/repo.sh
 
 RUN CUDA_VERSION="$CUDA_VERSION" /tmp/nvidia.sh
 
 RUN /tmp/cf.sh
-
-RUN /tmp/repo.sh
 
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /var/cache/debconf/* /tmp/*
 
@@ -73,6 +69,12 @@ USER "$USER_ID:$USER_ID"
 
 ENV TZ=Etc/UTC \
     RUN_MODE=production
+
+COPY llama.sh /root/llama.sh
+RUN chmod +x /root/llama.sh
+
+COPY repo.sh /root/repo.sh
+RUN chmod +x /root/repo.sh
 
 EXPOSE 6333
 EXPOSE 6334
