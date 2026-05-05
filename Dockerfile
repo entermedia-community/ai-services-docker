@@ -74,9 +74,6 @@ USER "$USER_ID:$USER_ID"
 ENV TZ=Etc/UTC \
     RUN_MODE=production
 
-COPY llama.sh /root/llama.sh
-RUN chmod +x /root/llama.sh
-
 EXPOSE 6333
 EXPOSE 6334
 
