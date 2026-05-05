@@ -52,7 +52,6 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/* /var/cache/debconf/* /tmp/*
 
 RUN pip install --no-cache-dir --upgrade pip && \
 		pip install --no-cache-dir \
-			accelerate \
 			transformers \
 			torch --index-url https://download.pytorch.org/whl/cu128 \
 			torchaudio --index-url https://download.pytorch.org/whl/cu128 \
