@@ -3,7 +3,7 @@ FROM --platform=${QDRANT_PLATFORM} qdrant/qdrant:gpu-nvidia-latest
 
 COPY config /qdrant/config
 
-ARG CUDA_VERSION=13-0
+ARG CUDA_VERSION=12-8
 
 RUN set -eux; \
 	export DEBIAN_FRONTEND=noninteractive; \
@@ -43,14 +43,33 @@ RUN set -eux; \
 COPY nvidia.sh /tmp/nvidia.sh
 COPY cf.sh /tmp/cf.sh
 
-RUN chmod +x /tmp/nvidia.sh
-RUN chmod +x /tmp/cf.sh
+RUN chmod +x /tmp/nvidia.sh && chmod +x /tmp/cf.sh
 
-RUN CUDA_VERSION="$CUDA_VERSION" /tmp/nvidia.sh
-
-RUN /tmp/cf.sh
+RUN	CUDA_VERSION="$CUDA_VERSION" /tmp/nvidia.sh && \
+	/tmp/cf.sh
 
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /var/cache/debconf/* /tmp/*
+
+RUN pip install --no-cache-dir --upgrade pip && \
+		pip install --no-cache-dir \
+			accelerate \
+			transformers \
+			torch --index-url https://download.pytorch.org/whl/cu128 \
+			torchaudio --index-url https://download.pytorch.org/whl/cu128 \
+			torchvision --index-url https://download.pytorch.org/whl/cu128 \
+			torchcodec --index-url https://download.pytorch.org/whl/cu128 && \
+		pip install --no-cache-dir ninja && \
+		pip install --no-cache-dir fastapi[standard] \
+			uvicorn[standard] \
+			cachetools \
+			pydantic \
+			pydantic-settings \
+			python-multipart \
+			faster-whisper \
+			pyannote-audio \
+			librosa \
+			soundfile
+
 
 ARG APP=/qdrant
 
@@ -70,11 +89,6 @@ USER "$USER_ID:$USER_ID"
 ENV TZ=Etc/UTC \
     RUN_MODE=production
 
-COPY llama.sh /root/llama.sh
-RUN chmod +x /root/llama.sh
-
-COPY repo.sh /root/repo.sh
-RUN chmod +x /root/repo.sh
 
 EXPOSE 6333
 EXPOSE 6334
