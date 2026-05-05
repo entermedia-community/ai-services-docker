@@ -42,19 +42,15 @@ RUN set -eux; \
 
 COPY nvidia.sh /tmp/nvidia.sh
 COPY cf.sh /tmp/cf.sh
-COPY llama.sh /tmp/llama.sh
 COPY repo.sh /tmp/repo.sh
 
 RUN chmod +x /tmp/nvidia.sh
 RUN chmod +x /tmp/cf.sh
-RUN chmod +x /tmp/llama.sh
 RUN chmod +x /tmp/repo.sh
 
 RUN CUDA_VERSION="$CUDA_VERSION" /tmp/nvidia.sh
 
 RUN /tmp/cf.sh
-
-RUN /tmp/llama.sh
 
 RUN /tmp/repo.sh
 
@@ -77,6 +73,9 @@ USER "$USER_ID:$USER_ID"
 
 ENV TZ=Etc/UTC \
     RUN_MODE=production
+
+COPY llama.sh /root/llama.sh
+RUN chmod +x /root/llama.sh
 
 EXPOSE 6333
 EXPOSE 6334
